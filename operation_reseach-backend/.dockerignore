@@ -1,0 +1,6 @@
+.idea
+.DS_Store
+.gitignore
+.git
+app/instance/config_local.py
+log/*
