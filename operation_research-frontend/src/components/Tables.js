@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {    createUser } from '../services/admin.service'
 import {
   CBadge, CButton,
@@ -18,6 +18,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import MenuItem from "@material-ui/core/MenuItem";
 import {connect, useDispatch} from "react-redux";
+import {getUsers} from "../actions/users";
+import {getGroups} from "../actions/groups";
 
 const permissions = [
     {value: 1, label: 'User'},
@@ -25,7 +27,7 @@ const permissions = [
    {value: 3, label: 'Admin'}
 ]
 
-const fields = ['id','name', 'second_name', 'email','permissions', 'active', 'group']
+const fields = ['name', 'second_name', 'email','permissions', 'active', 'group']
 
 const TablesTemplate = (props) => {
   const {users, groups} = props;
@@ -155,7 +157,8 @@ const TablesTemplate = (props) => {
                                           <Button onClick={() =>
                                           {
                                               createUser(currentName, secondName, currentEmail, '1234567', currentPermissions, currentGroups, false).then(r => clearState())
-                                              }} color="primary">
+                                                    dispatch(getUsers())
+                                          }} color="primary">
                                             Save
                                           </Button>
                                         </DialogActions>
@@ -191,6 +194,15 @@ const TablesTemplate = (props) => {
                 setActive(e.active)
                 setOpenNew(true)
               }}
+               scopedSlots = {{
+        'status':
+          (item)=>(
+            <td>
+              <CBadge>
+                {item.permissions}
+              </CBadge>
+            </td>
+          )}}
               striped
               bordered
               size="sm"

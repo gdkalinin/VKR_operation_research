@@ -106,7 +106,7 @@ const Register = () => {
           {!successful && (
             <div>
               <div className="form-group">
-                <label htmlFor="username">Username</label>
+                <label htmlFor="username">First name</label>
                 <Input
                   type="text"
                   className="form-control"
@@ -116,7 +116,17 @@ const Register = () => {
                   validations={[required, vusername]}
                 />
               </div>
-
+              <div className="form-group">
+                <label htmlFor="username">Second name</label>
+                <Input
+                  type="text"
+                  className="form-control"
+                  name="second name"
+                  value={username}
+                  onChange={onChangeUsername}
+                  validations={[required, vusername]}
+                />
+              </div>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
                 <Input

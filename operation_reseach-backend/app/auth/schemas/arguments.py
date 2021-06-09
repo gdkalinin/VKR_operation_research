@@ -54,6 +54,10 @@ class CreateUserArgsSchema(ArgsSchema):
     allowed_presentations = fields.Dict()
 
 
+class UpdateTaskSchema(ArgsSchema):
+    task_id = fields.Int(required=True)
+    student_solution = fields.List(fields.Int(), required=True)
+
 class CreateTestSchema(ArgsSchema):
     assignee = fields.Int(
         required=True,

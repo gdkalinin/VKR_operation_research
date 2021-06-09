@@ -14,7 +14,7 @@ import {
     CRow
 } from "@coreui/react";
 import {getPresentations} from "../actions/presentations";
-const fields = ['id','name']
+const fields = ['name']
 
 const PresentationsTemplate = (props) => {
     const history = useHistory();
@@ -57,6 +57,7 @@ const PresentationsTemplate = (props) => {
               pagination
             />
             </CCardBody>
+                  <CButton onClick={() => {}}  type="submit" size="sm" color="secondary">Add new presentation</CButton>
 
           </CCard>
 

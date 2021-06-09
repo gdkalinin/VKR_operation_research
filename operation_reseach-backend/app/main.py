@@ -17,7 +17,8 @@ from auth.schemas.models import SuccessJsonSchema, SuccessSchema
 import instance.config
 from flask_cors import CORS
 
-from auth.schemas.arguments import CreateUserArgsSchema, CreateTestSchema
+from auth.schemas.arguments import CreateUserArgsSchema, CreateTestSchema, UpdateTaskSchema
+from equipment import equipment_update
 from service.database import db, User, Group, Permission, Presentation, Test, Task
 import time
 from app.instance.config import (
@@ -29,6 +30,9 @@ import io
 from base64 import encodebytes
 from PIL import Image
 from flask import jsonify
+
+from service.gomori import gomori_task, gomori
+from service.investments import investments_task
 from service.simplex import simplex_task, Simplex
 
 resource = Blueprint(
@@ -246,8 +250,46 @@ def create_tests(args):
                     task = Task(test_id=test.id, task_type=1, condition=task, solution=final, student_solution={})
                     db.session.add(task)
                     db_commit()
+            if key == 'gomori':
+                for i in range(int(tasks[key])):
+                    task = []
+                    result = gomori_task(task)
+                    S = gomori(task, 0, result)
+
+                    result_sum = 0
+                    for j in range(len(final)):
+                        result_sum += (-1) * task[len(task) - 1][j + 1] * float(final[j])
+                    final.append(result_sum)
+                    task = Task(test_id=test.id, task_type=2, condition=task, solution=final, student_solution={})
+                    db.session.add(task)
+                    db_commit()
+            if key == 'equipment':
+                for i in range(int(tasks[key])):
+                    result = []
+                    task = equipment_update(result)
+                    task = Task(test_id=test.id, task_type=3, condition=task, solution=result, student_solution=[])
+                    db.session.add(task)
+                    db_commit()
+            if key == 'investments':
+                for i in range(int(tasks[key])):
+                    result = []
+                    task = investments_task(result)
+                    task = Task(test_id=test.id, task_type=4, condition=task, solution=result, student_solution=[])
+                    db.session.add(task)
+                    db_commit()
     return {'result': 200}
 
+
+@app.route("/api/tasks", methods=["PUT"])
+@jwt_required
+@resource.arguments(UpdateTaskSchema)
+@resource.response(SuccessJsonSchema)
+def write_student_solution(args):
+    task = db.session.query(Task.solution, Task.student_solution, Task.id).filter(Task.id == args['task_id']).update({'student_solution': args['student_solution']})
+    db_commit()
+    result = db.session.query(Task.solution, Task.student_solution).filter(Task.id == args['task_id']).first()
+    db.session.query(Task.solution, Task.student_solution, Task.id).filter(Task.id == args['task_id']).update({'solved': result.student_solution == result.solution})
+    db_commit()
 
 @app.route("/api/groups", methods=["GET"])
 @jwt_required
@@ -274,16 +316,18 @@ def get_groups_search():
 def get_test_search(test_id):
     """Возвращает тест по id"""
     test = db.session.query(
-        Test.is_rating, Test.description, Test.finish_until, Test.start_at, Test.id
+        Test.is_rating, Test.description, Test.finish_until, Test.start_at, Test.id, Test.user_id
     ).filter(Test.id == test_id).first()
-    tasks = db.session.query(Task.id, Task.student_solution, Task.condition, Task.task_type).filter(Task.test_id == test.id).all()
+    tasks = db.session.query(Task.id, Task.student_solution, Task.condition, Task.task_type, Task.solved, Task.solution).filter(
+        Task.test_id == test.id).all()
     test = {
-            "rating": test.is_rating,
-            "description": test.description,
-            "finish_until": test.finish_until,
-            "start_at": test.start_at,
-            "tasks": tasks
-        }
+        "rating": test.is_rating,
+        "description": test.description,
+        "finish_until": str(test.finish_until),
+        "start_at": str(test.start_at),
+        "user_id": test.user_id,
+        "tasks": tasks
+    }
     return {"status": "ok", "data": test}
 
 
@@ -318,8 +362,8 @@ def get_tests_search():
         {
             "id": t.id,
             "description": t.description,
-            'start_date': t.start_at,
-            'finish_until': t.finish_until,
+            'start_date': str(t.start_at),
+            'finish_until': str(t.finish_until),
             'rating': t.is_rating,
             "assignee": u.firstname + ' ' + u.lastname
 
