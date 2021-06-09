@@ -1,5 +1,9 @@
 import random as rand
 from sympy import Rational
+import numpy as np
+import fractions
+from math import floor
+import simplex as simp
 
 
 def gomori_task(result_array):
@@ -62,3 +66,53 @@ def line(point_a):
     y = point_a[1] * 2
     z = int(point_a[2])
     return [0, -x, -y, -z]
+
+
+def gomori(source, task_num=1, sights_arr=[]):
+    np.set_printoptions(formatter={'all': lambda x: str(fractions.Fraction(x).limit_denominator())})
+    result = source
+    # result = []
+    res = [0, 0, 0]
+    sights = sights_arr
+    S = simp.Simplex(result, task_num)
+    S.simple(result, sights)
+    S.calculate(res, False)
+
+    current = -1
+    for i in range(len(S.table)):
+        if S.table[i][0] - floor(S.table[i][0]) != 0 and (
+                current == -1 or S.table[i][0] - floor(S.table[i][0]) > S.table[current][0] - floor(
+            S.table[current][0])):
+            current = i
+
+    while current != -1:
+        for i in range(S.m):
+            S.table[i].append(0.0)
+        S.n += 1
+        new_row = [-(S.table[current][0] - floor(S.table[current][0]))]
+        for i in range(1, S.n):
+            new_row.append(-(S.table[current][i] - floor((S.table[current][i]))))
+        new_row[S.n - 1] = 1
+        S.table.insert(len(S.table) - 1, new_row)
+        res = [0, 0, 0]
+
+        S.basis.append(S.n - 1)
+        S.m += 1
+        result = []
+        for i in range(len(S.basis)):
+            result.append([S.basis[i]])
+        result.append([-1])
+
+        result = np.append(result, S.table, axis=1)
+        current = -1
+
+        S.calculate(res, False)
+        for i in range(len(res)):
+            if res[i] - floor(res[i]) != 0:
+                for i in range(len(S.table)):
+                    if current == -1 or (round(S.table[i][0] - floor(S.table[i][0]), 6) > round(
+                            S.table[current][0] - floor(S.table[current][0]), 6)):
+                        current = i
+                break
+
+    return res

@@ -4,7 +4,6 @@ import {GET_TESTS_FAIL, GET_TESTS_SUCCESS, GET_TEST_FAIL, GET_TEST_SUCCESS, SET_
 export const getTests = () => (dispatch) => {
   return TestsService.getTestsBoard().then(
     (data) => {
-            console.log(data.data.data)
 
       dispatch({
         type: GET_TESTS_SUCCESS,
@@ -38,7 +37,6 @@ export const getTests = () => (dispatch) => {
 export const getCurrentTest = (id: number) => (dispatch) => {
   return TestsService.getTest(id).then(
     (data) => {
-            console.log(data.data.data)
 
       dispatch({
         type: GET_TEST_SUCCESS,

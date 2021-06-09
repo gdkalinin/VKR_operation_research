@@ -24,12 +24,12 @@ import {createUser} from "../services/admin.service";
 import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import {getGroups} from "../actions/groups";
+import moment from "moment";
 
-const fields = ['id', 'description', 'assignee', 'start_date', 'finish_until', 'rating']
+const fields = [ 'description', 'assignee', 'start_date', 'finish_until', 'rating']
 
 const TestsTemplate = (props) => {
       const {groups} = props;
-    console.log(props.user)
     const [openTest, setOpenTest] = useState(false)
     const [numberLinear, setNumberLinear] = useState(0)
     const [numberSimplex, setNumberSimplex] = useState(0)
@@ -40,11 +40,12 @@ const TestsTemplate = (props) => {
     const [theoreticalQuestionFirst, setTheoreticalQuestionFirst] = useState('')
     const [theoreticalQuestionSecond, setTheoreticalQuestionSecond] = useState('')
     const [rating, setRating] = useState(false)
-    const [startDate, setStartDate] = useState('2021-05-24T10:30')
-    const [endDate, setEndDate] = useState('2021-05-24T10:30')
+    const [startDate, setStartDate] = useState('2021-06-08T10:30')
+    const [endDate, setEndDate] = useState('2021-06-09T10:30')
     const [assignee, setAssignee] = useState('')
     const [description, setDescription] = useState('')
   const [currentGroups, setCurrentGroups] = useState(null)
+    const dispatch = useDispatch();
 
     const clearState = () => {
         setOpenTest(false)
@@ -57,12 +58,22 @@ const TestsTemplate = (props) => {
         setTheoreticalQuestionFirst('')
         setTheoreticalQuestionSecond('')
         setRating(false)
-        setStartDate('2021-05-24T10:30')
-        setEndDate('2021-05-24T10:30')
+        setStartDate('2021-06-08T10:30')
+        setEndDate('2021-06-09T10:30')
         setAssignee('')
         setDescription('')
     }
   const { tests } = props;
+    useEffect(() => {
+            if (tests) {
+                tests.map(test => {
+                    console.log(((test)))
+                    test.start_date = moment(new Date(Date.parse(test.start_date)).toLocaleString()).format('MMM DD YYYY, HH:mm:ss')
+                    test.finish_until = moment(new Date(Date.parse(test.finish_until)).toLocaleString()).format('MMM DD YYYY, HH:mm:ss')
+                    return test
+                })
+            }}, [tests])
+
   const history = useHistory();
     return ( <div>
         <CBreadcrumb>
@@ -71,7 +82,6 @@ const TestsTemplate = (props) => {
             <CBreadcrumbItem active>Tests
             </CBreadcrumbItem>
         </CBreadcrumb>
-        <CButton color='primary' onClick={() => setOpenTest(true)}>Create a new test</CButton>
         {openTest && <Dialog open={openTest} onClose={() => clearState()}
                              aria-labelledby="form-dialog-title">
             <DialogTitle>Create new test
@@ -102,11 +112,13 @@ const TestsTemplate = (props) => {
                   {props.user.permissions_id !== 1 && <TextField
                       style={{float: 'center'}}
                     id="datetime-local"
+                      required
                     label="Start time"
                     type="datetime-local"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                    defaultValue="2017-05-24T10:30"
+                    defaultValue="2021-06-24T10:30"
+                      pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
                     InputLabelProps={{
                       shrink: true,
                     }}
@@ -116,6 +128,7 @@ const TestsTemplate = (props) => {
                     id="datetime-local"
                     label="End time"
                     type="datetime-local"
+                      required
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}                    InputLabelProps={{
                       shrink: true,
@@ -193,8 +206,10 @@ const TestsTemplate = (props) => {
                 </Button>
                 <Button onClick={() =>
                 {
-                    const dict = {'simplex': numberSimplex, 'gomori': numberGomori}
+                    const dict = {'simplex': numberSimplex, 'gomori': numberGomori, 'linear': numberLinear, 'equipment': numberEquipment, 'investments' : numberInvestments, 'johnson': numberJohnson}
                     createTest(currentGroups, startDate, endDate, rating, description, dict).then(clearState())
+                    dispatch(getTests())
+
                 }} color="primary">
                     Create
                 </Button>
@@ -228,6 +243,7 @@ const TestsTemplate = (props) => {
               pagination
             />
             </CCardBody>
+        <CButton color='primary' onClick={() => setOpenTest(true)}>Create a new test</CButton>
 
           </CCard>
 
@@ -254,5 +270,5 @@ export const TestList = () => {
         dispatch(getGroups())
     }, [])
 
-    return (<Tests></Tests>)
+    return (<Tests/>)
 }

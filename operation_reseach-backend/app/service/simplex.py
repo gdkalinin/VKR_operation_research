@@ -3,6 +3,7 @@ from fractions import Fraction
 import numpy as np
 import fractions
 
+
 def simplex_task(result_array=[]):
     # Точки записываются в формате a, b, c
     main_point = [rand.randint(7, 15), rand.randint(7, 15), rand.randint(7, 15)]
@@ -15,11 +16,11 @@ def simplex_task(result_array=[]):
     result_array.append(plane(points_array[0], points_array[1], points_array[3]))
     result_array.append(plane(points_array[1], points_array[2], points_array[3]))
 
-    K = [(points_array[0][0] + points_array[3][0])/2, (points_array[0][1] + points_array[3][1])/2,
-         (points_array[0][2] + points_array[3][2])/2]
-    M = [(points_array[1][0] + points_array[2][0])/2, (points_array[1][1] + points_array[2][1])/2,
-         (points_array[1][2] + points_array[2][2])/2 ]
-    KM = [(K[0] + M[0])/2, (K[1] + M[1])/2, (K[2] + M[2])/2]
+    K = [(points_array[0][0] + points_array[3][0]) / 2, (points_array[0][1] + points_array[3][1]) / 2,
+         (points_array[0][2] + points_array[3][2]) / 2]
+    M = [(points_array[1][0] + points_array[2][0]) / 2, (points_array[1][1] + points_array[2][1]) / 2,
+         (points_array[1][2] + points_array[2][2]) / 2]
+    KM = [(K[0] + M[0]) / 2, (K[1] + M[1]) / 2, (K[2] + M[2]) / 2]
     status = []
     for l in range(len(result_array)):
         cur_sum = 0
@@ -93,8 +94,6 @@ def line(point_a, point_b):
             x = point_a[0] + AB[0] * t
             y = point_a[1] + AB[1] * t
     return [0, -x, -y, -z]
-
-
 
 
 np.set_printoptions(formatter={'all': lambda x: str(fractions.Fraction(x).limit_denominator())})
